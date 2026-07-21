@@ -475,6 +475,14 @@
       const n = Number(value);
       return (n > 0 ? "+" : "") + (n * 100).toFixed(1) + "%";
     }
+    function fmtPctPlain(value) {
+      if (value === null || value === undefined || Number.isNaN(Number(value))) return "N/A";
+      return (Number(value) * 100).toFixed(1) + "%";
+    }
+    function trendClass(value) {
+      if (value === null || value === undefined || Number.isNaN(Number(value)) || Number(value) === 0) return "";
+      return Number(value) > 0 ? " delta-up" : " delta-down";
+    }
     function recalcTopRow(row) {
       row["Past 7 Days"] = Number(row["Past 7 Days"] || 0);
       row[keyPrev] = Number(row[keyPrev] || 0);
@@ -609,13 +617,13 @@
       const wowAvg = assistantTop10.reduce((sum, row) => sum + (Number(row.WoW) || 0), 0) / assistantTop10.length;
       const queryWow = data.meta.previous_rows ? (data.meta.current_rows - data.meta.previous_rows) / data.meta.previous_rows : null;
       const items = [
-        [t("past7Query"), fmtInt(data.meta.current_rows)],
-        [t("queryWow"), fmtPct(queryWow)],
-        [t("top10Share"), fmtPct(top10Total / data.meta.current_rows)],
-        [t("top10AvgWow"), fmtPct(wowAvg)]
+        [t("past7Query"), fmtInt(data.meta.current_rows), ""],
+        [t("queryWow"), fmtPct(queryWow), trendClass(queryWow)],
+        [t("top10Share"), fmtPctPlain(top10Total / data.meta.current_rows), ""],
+        [t("top10AvgWow"), fmtPct(wowAvg), trendClass(wowAvg)]
       ];
-      document.getElementById("kpis").innerHTML = items.map(([label, value]) =>
-        '<div class="kpi"><div class="kpi-label">' + label + '</div><div class="kpi-value">' + value + '</div></div>'
+      document.getElementById("kpis").innerHTML = items.map(([label, value, cls]) =>
+        '<div class="kpi"><div class="kpi-label">' + label + '</div><div class="kpi-value' + cls + '">' + value + '</div></div>'
       ).join("");
     }
     function renderBars() {
